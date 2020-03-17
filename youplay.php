@@ -1,6 +1,5 @@
 <?php
 
-
   /*
     Plugin Name: YouPlay
     Description: Shortcodes for YouPlay formats
@@ -51,7 +50,6 @@
       $this->push_param("nt", false, $params, $attr);
       $this->push_param("sha", false, $params, $attr);
       $this->push_param("ht", "true", $params, $attr);
-    $this->push_param("beta_preview", false, $params, $attr);
       return join($params, "&");
     }
 
@@ -80,8 +78,7 @@
       $mute = false;
       $autoplay = false;
       $addons = [0, 0, 0];
-      $floating = 2;
-      $beta_preview = true;
+      $floating = null;
       $poster = null;
 
       forEach ($attr as $key => $value) {
@@ -118,9 +115,6 @@
         if ($key === "pl") {
           $pl = $value;
         }
-    if ($key === "beta_preview") {
-          $beta_preview = $value;
-        }
       }
 
       $data_config = array(
@@ -133,9 +127,7 @@
       if ($floating) {
         $data_config["floating"] = $floating;
       }
-      if ($beta_preview) {
-        $data_config["beta_preview"] = $beta_preview;
-      }
+
       if ($poster) {
         $data_config["poster"] = $poster;
       }
