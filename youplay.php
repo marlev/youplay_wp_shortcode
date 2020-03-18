@@ -4,18 +4,100 @@
   /*
     Plugin Name: YouPlay
     Description: Shortcodes for YouPlay formats
-    Author: Robert Brewitz Borg <hello@robertbrewitz.com>
-    Version: 1.0.1
+    Author: Robert Brewitz Borg <hello@robertbrewitz.com> & Martin Levy <martin.levy@aller.com>
+    Version: 1.1
     License: MIT
     Ex.:
     [YouPlaySinglePlayer video="334,32,886" yot yod yos ap mute floating="4" time="62" poster="http://poster.com"]
   */
 
+register_activation_hook(__FILE__, 'youplay_add_defaults');
+register_uninstall_hook(__FILE__, 'youplay_delete_plugin_options');
+add_action('admin_init', 'youplay_init' );
+add_action("admin_menu","youplay_admin_menu");
+define('youplay_option_params', 'floating,autoplay,mute,beta_preview'); //What options to display in page
+
+
+// Delete options table entries ONLY when plugin deactivated AND deleted
+function youplay_delete_plugin_options() {
+  delete_option('youplay_options');
+}
+// Define default option settings
+function youplay_add_defaults() {
+  $tmp = get_option('youplay_options');
+    if(($tmp['chk_default_options_db']=='1')||(!is_array($tmp))) {
+    delete_option('youplay_options'); // so we don't have to reset all the 'off' checkboxes too! (don't think this is needed but leave for now)
+    $arr = array(
+      "client" => "Enter Organisation Name",
+      "token" => "Enter API Key"
+    );
+    update_option('youplay_options', $arr);
+  }
+}
+// Init plugin options to white list our options
+function youplay_init(){
+  register_setting( 'youplay_plugin_options', 'youplay_options' );
+}
+
+//Settings page content
+function youplay_admin_menu(){
+  //"add_options_page" = sub_page under Settings, "add_page" = page straight ,
+  add_options_page(
+    /*page title*/'Dashboard',
+    /*Menu Title*/'YouPlay',
+    /*access*/'administrator',
+    'youplay',
+    'youplay_settings_page'
+  );
+}   
+    
+    
+function youplay_settings_page() { /*handler for above menu item*/
+  ?>
+  <div class="wrap">
+    <!-- Display Plugin Icon, Header, and Description -->
+    <div class="icon32" id="icon-options-general"><br></div>
+    <h2>YouPlay Video options</h2>
+    <!-- Beginning of the Plugin Options Form -->
+    <form method="post" action="options.php">
+      <?php settings_fields('youplay_plugin_options'); ?>
+      <?php $options = get_option('youplay_options'); ?>
+
+      <table class="form-table">
+
+        <tr>
+          <th scope="row">
+            Options:
+            <div style='color:grey;font-weight:lighter;font-size:small'>
+              Enable options to appear when embedding YouPlay
+            </div>
+          </th>
+          <td>
+            <?
+              $youplay_option_params = explode(',', youplay_option_params);
+              foreach ($youplay_option_params as $key) {
+                $checked = ($options[$key] == "on") ? "checked" : "";
+                echo "<input type='checkbox' name='youplay_options[".$key."]' ".$checked."> ".ucfirst($key);
+                echo "\n</br>\n";
+              }
+            ?>
+          </td>
+        </tr>
+
+      </table>
+      <p class="submit">
+      <input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
+      </p>
+    </form>
+  <?
+} 
+
+
   class YouPlay {
     function YouPlay () {
       $this->__initialize();
     }
-
+          
     function __initialize () {
       add_shortcode("YouPlayMainPlayer", array(&$this, "main"));
       add_shortcode("YouPlayNewMainPlayer", array(&$this, "newMainPlayer"));
