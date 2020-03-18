@@ -1,15 +1,14 @@
 <?php
 
+
   /*
     Plugin Name: YouPlay
     Description: Shortcodes for YouPlay formats
     Author: Robert Brewitz Borg <hello@robertbrewitz.com>
     Version: 1.0.1
     License: MIT
-
     Ex.:
     [YouPlaySinglePlayer video="334,32,886" yot yod yos ap mute floating="4" time="62" poster="http://poster.com"]
-
   */
 
   class YouPlay {
@@ -50,6 +49,7 @@
       $this->push_param("nt", false, $params, $attr);
       $this->push_param("sha", false, $params, $attr);
       $this->push_param("ht", "true", $params, $attr);
+    $this->push_param("beta_preview", false, $params, $attr);
       return join($params, "&");
     }
 
@@ -78,7 +78,8 @@
       $mute = false;
       $autoplay = false;
       $addons = [0, 0, 0];
-      $floating = null;
+      $floating = 2;
+      $beta_preview = true;
       $poster = null;
 
       forEach ($attr as $key => $value) {
@@ -115,6 +116,9 @@
         if ($key === "pl") {
           $pl = $value;
         }
+    if ($key === "beta_preview") {
+          $beta_preview = $value;
+        }
       }
 
       $data_config = array(
@@ -127,7 +131,9 @@
       if ($floating) {
         $data_config["floating"] = $floating;
       }
-
+      if ($beta_preview) {
+        $data_config["beta_preview"] = $beta_preview;
+      }
       if ($poster) {
         $data_config["poster"] = $poster;
       }
