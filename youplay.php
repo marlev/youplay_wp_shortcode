@@ -28,8 +28,8 @@ function youplay_add_defaults() {
     if(($tmp['chk_default_options_db']=='1')||(!is_array($tmp))) {
     delete_option('youplay_options'); // so we don't have to reset all the 'off' checkboxes too! (don't think this is needed but leave for now)
     $arr = array(
-      "client" => "Enter Organisation Name",
-      "token" => "Enter API Key"
+      "client" => "Enter Organisation Name", //not in use
+      "token" => "Enter API Key" //not in use
     );
     update_option('youplay_options', $arr);
   }
@@ -69,7 +69,10 @@ function youplay_settings_page() { /*handler for above menu item*/
           <th scope="row">
             Options:
             <div style='color:grey;font-weight:lighter;font-size:small'>
-              Enable options to appear when embedding YouPlay
+              <p>Enable options to appear when embedding YouPlay.</p> 
+        <p>beta_preview wont work with floating</p>
+        <p>floating = enables autoplay and mute</p>
+        <p>autoplay = enables mute</p>
             </div>
           </th>
           <td>
@@ -117,7 +120,7 @@ function youplay_settings_page() { /*handler for above menu item*/
       $this->push_param("yot", "1", $params, $attr);
       $this->push_param("yod", "1", $params, $attr);
       $this->push_param("yos", "1", $params, $attr);
-      $this->push_param("ap", "true", $params, $attr);
+      $this->push_param("ap", "false", $params, $attr);
       $this->push_param("mute", "true", $params, $attr);
       $this->push_param("lp", "true", $params, $attr);
       $this->push_param("mv", "true", $params, $attr);
@@ -153,17 +156,23 @@ function youplay_settings_page() { /*handler for above menu item*/
     }
 
     function get_data_config($attr, $player) {
-      $video = explode(",", $attr["video"]);
+    $video = explode(",", $attr["video"]);
       $zone_id = $video[0];
       $program_id = $video[1];
       $part_id = $video[2];
       $mute = false;
       $autoplay = false;
       $addons = [0, 0, 0];
-      $floating = 2;
-      $beta_preview = true;
-      $poster = null;
-
+      $beta_preview = null;
+    $floating = null;
+      $poster = null; 
+    foreach (get_option('youplay_options') as $key => $value) {
+      if ($value == "on") $value = true;
+    if ($key == "floating") $attr[$key] = 2;
+    $attr[$key] = $value;
+      
+    }
+    
       forEach ($attr as $key => $value) {
         if ($value == "yot") {
           $addons[0] = "1";
@@ -180,8 +189,9 @@ function youplay_settings_page() { /*handler for above menu item*/
         if ($value == "ap" || $value == "autoplay") {
           $autoplay = true;
         }
-        if ($key === "floating") {
-          $floating = $value;
+        if ($key == "floating") {
+      $floating = $value;
+      
         }
         if ($key === "poster") {
           $poster = $value;
@@ -212,6 +222,7 @@ function youplay_settings_page() { /*handler for above menu item*/
 
       if ($floating) {
         $data_config["floating"] = $floating;
+
       }
       if ($beta_preview) {
         $data_config["beta_preview"] = $beta_preview;
